@@ -1,12 +1,58 @@
+// import type { Metadata } from "next";
+// import { Inter } from "next/font/google";
+// import "./globals.css";
+
+// const inter = Inter({ subsets: ["latin"] });
+
+// export const metadata: Metadata = {
+//   title: "Quote Generator",
+//   description: "Assignment 1 for Nexium",
+// };
+
+// export default function RootLayout({
+//   children,
+// }: Readonly<{
+//   children: React.ReactNode;
+// }>) {
+//   return (
+//     <html lang="en">
+//       <body className={inter.className}>{children}</body>
+//     </html>
+//   );
+// // }
+// import type { Metadata } from "next";
+// import { Inter } from "next/font/google";
+// // Make sure this import is present
+// import "./globals.css";
+
+// const inter = Inter({ subsets: ["latin"] });
+
+// export const metadata: Metadata = {
+//   title: "Quote Generator",
+//   description: "Generate random quotes or search for a specific topic to find inspiration.",
+// };
+
+// export default function RootLayout({
+//   children,
+// }: Readonly<{
+//   children: React.ReactNode;
+// }>) {
+//   return (
+//     <html lang="en">
+//       <body className={inter.className}>{children}</body>
+//     </html>
+//   );
+// }
+import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
 
+// Sets up the Inter font as specified in the prompt
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Quote Generator",
-  description: "Assignment 1 for Nexium",
+  description: "Generate random quotes or search for a specific topic to find inspiration.",
 };
 
 export default function RootLayout({
