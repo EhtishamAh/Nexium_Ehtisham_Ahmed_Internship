@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { scrapeAndSummarise } from './actions';
 
 export default function Home() {
   const [url, setUrl] = useState("");
@@ -15,9 +16,22 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic will be added in later phases
-    console.log("Submitting URL:", url);
-  };
+    setIsLoading(true);
+    setError("");
+    setSummary("");
+    setUrduTranslation("");
+
+    const result = await scrapeAndSummarise(url);
+
+    if (result.error) {
+        setError(result.error);
+    } else if (result.summary) {
+        // For now, we only get the summary. Translation will be added next.
+        setSummary(result.summary);
+    }
+
+    setIsLoading(false);
+};
 
   return (
     <main className="flex min-h-screen flex-col items-center gap-8 p-12 bg-gradient-to-br from-gray-900 to-slate-800 text-white">
