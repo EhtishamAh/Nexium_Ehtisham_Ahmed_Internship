@@ -2,7 +2,10 @@
 'use server';
 
 import * as cheerio from 'cheerio';
+// Import our new AI functions
+import { summarizeText, translateToUrdu } from '@/lib/ai';
 
+// Update the scrapeAndSummarise function
 export async function scrapeAndSummarise(url: string) {
   if (!url) {
     return { error: 'URL is required.' };
@@ -10,32 +13,28 @@ export async function scrapeAndSummarise(url: string) {
 
   try {
     const response = await fetch(url);
-    if (!response.ok) {
-      return { error: `Failed to fetch URL: ${response.statusText}` };
-    }
+    // ... (fetching and cheerio logic remains the same)
     const html = await response.text();
     const $ = cheerio.load(html);
-
-    // A common strategy: find the main content area or just grab all paragraph text.
-    // This selector might need to be adjusted for different sites.
-    const mainContent = $('article, main, .post-content, .blog-post').text();
-    const fullText = mainContent || $('p').text();
+    const fullText = ($('article, main').text() || $('p').text()).trim();
 
     if (!fullText) {
       return { error: 'Could not extract any text from the page.' };
     }
 
-    // We'll add summarization and DB logic here in the next phases.
-    // For now, let's return a snippet of the scraped text.
-    const simulatedSummary = fullText.trim().substring(0, 500) + '...';
+    // --- NEW LOGIC ---
+    // Use our new functions
+    const summary = summarizeText(fullText);
+    const urduTranslation = translateToUrdu(summary);
 
     return {
-      summary: simulatedSummary,
-      fullText: fullText.trim()
+      summary,
+      urduTranslation, // Add translation to the return object
+      fullText 
     };
 
   } catch (error) {
-    console.error(error);
+    // ... (error handling remains the same)
     if (error instanceof Error) {
         return { error: `An error occurred: ${error.message}` };
     }

@@ -23,12 +23,16 @@ export default function Home() {
 
     const result = await scrapeAndSummarise(url);
 
+    // file: app/page.tsx
+    // In your handleSubmit function, update the success block:
+    // ...
     if (result.error) {
         setError(result.error);
-    } else if (result.summary) {
-        // For now, we only get the summary. Translation will be added next.
+    } else if (result.summary && result.urduTranslation) { // check for both
         setSummary(result.summary);
+        setUrduTranslation(result.urduTranslation); // Set the translation state
     }
+    // ...
 
     setIsLoading(false);
 };
