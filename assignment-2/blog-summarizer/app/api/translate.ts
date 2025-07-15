@@ -1,32 +1,46 @@
 // file: app/api/translate.ts
 
-import type { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export const runtime = 'edge'; // Specify edge runtime
+export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   try {
     const { text } = await req.json();
+    const apiKey = process.env.RAPIDAPI_KEY;
 
-    if (!text) {
-      return new Response(JSON.stringify({ error: 'Text is required' }), { status: 400 });
+    if (!text || !apiKey) {
+      return new Response(JSON.stringify({ error: 'Missing required parameters' }), { status: 400 });
     }
 
-    // We use a free translation API for this example
-    const apiUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|ur`;
+    const encodedParams = new URLSearchParams();
+    encodedParams.set('q', text);
+    encodedParams.set('target', 'ur');
+    encodedParams.set('source', 'en');
 
-    const response = await fetch(apiUrl);
-    const data = await response.json();
+    const response = await fetch('https://google-translate1.p.rapidapi.com/language/translate/v2', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+        'Accept-Encoding': 'application/gzip',
+        'X-RapidAPI-Key': apiKey,
+        'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
+      },
+      body: encodedParams
+    });
 
-    if (!response.ok || data.responseStatus !== 200) {
+    const result = await response.json();
+
+    if (!response.ok || !result.data?.translations?.[0]?.translatedText) {
+      console.error('Translation API Error:', result);
       return new Response(JSON.stringify({ error: 'Failed to translate text' }), { status: 500 });
     }
 
-    const translatedText = data.responseData.translatedText;
+    const translatedText = result.data.translations[0].translatedText;
 
     return new Response(JSON.stringify({ translation: translatedText }), { status: 200 });
 
-  } catch (error) {
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+  } catch { // The 'error' variable is removed from here
+    return new Response(JSON.stringify({ error: 'An internal error occurred' }), { status: 500 });
   }
 }
