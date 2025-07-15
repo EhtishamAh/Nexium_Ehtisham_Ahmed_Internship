@@ -1,21 +1,18 @@
-  // file: app/actions.ts
-  'use server';
+// file: app/actions.ts
+'use server';
 
-  import * as cheerio from 'cheerio';
-  // Import our new AI functions
-  import { summarizeText, translateToUrdu } from '@/lib/ai';
-  import { supabase } from '@/lib/supabaseClient';
-  import clientPromise from '@/lib/mongodb'; // Import Mongo client
+import * as cheerio from 'cheerio';
+import { summarizeText, translateToUrdu } from '@/lib/ai';
+import { supabase } from '@/lib/supabaseClient';
+import clientPromise from '@/lib/mongodb';
 
-  // Update the scrapeAndSummarise function
-  export async function scrapeAndSummarise(url: string) {
-    if (!url) {
-      return { error: 'URL is required.' };
-    }
+export async function scrapeAndSummarise(url: string) {
+  if (!url) {
+    return { error: 'URL is required.' };
+  }
 
-    try {
+  try {
     const response = await fetch(url);
-    // ... (fetching and cheerio logic remains the same)
     const html = await response.text();
     const $ = cheerio.load(html);
     const fullText = ($('article, main').text() || $('p').text()).trim();
@@ -24,57 +21,35 @@
       return { error: 'Could not extract any text from the page.' };
     }
 
-    // --- AI LOGIC (Stays the same) ---
-    const summary = summarizeText(fullText);
+    // --- Use local functions for summary and translation ---
+    const summary = summarizeText(fullText, 150);
     const urduTranslation = translateToUrdu(summary);
 
-    // --- ADD THE NEW SUPABASE LOGIC HERE ---
+    // --- Save to databases ---
     try {
-      const { error: supabaseError } = await supabase
-        .from('Summary') // The name of the table we created manually
-        .insert({
-          url: url,
-          summary: summary,
-          translation: urduTranslation,
-        });
+      // Save to Supabase
+      await supabase.from('Summary').insert({ url, summary, translation: urduTranslation });
 
-      if (supabaseError) {
-        throw supabaseError;
-      }
-      console.log('Summary successfully saved to Supabase for URL:', url);
+      // Correctly connect to MongoDB and save data
+      const mongoClient = await clientPromise;
+      const db = mongoClient.db("blogContent");
+      const collection = db.collection('articles');
+      await collection.updateOne(
+        { url: url },
+        { $set: { url: url, fullText: fullText, scrapedAt: new Date() } },
+        { upsert: true }
+      );
+
     } catch (dbError) {
-      console.error("Supabase Database Error:", dbError);
-      // Don't block the user, just log the error
+      console.error("Database save error:", dbError);
     }
-
-    // --- NEW MONGODB LOGIC ---
-try {
-    const mongoClient = await clientPromise;
-    const db = mongoClient.db("blogContent"); // Use the DB name from your URI
-    await db.collection("articles").insertOne({
-        url: url,
-        fullText: fullText,
-        scrapedAt: new Date(),
-    });
-} catch (mongoError) {
-    console.error("MongoDB Error:", mongoError);
-}
-
-
-
-    // --- RETURN STATEMENT (Stays the same) ---
-    return {
-      summary,
-      urduTranslation,
-      fullText
-    };
+    
+    return { summary, urduTranslation };
 
   } catch (error) {
-    // ... (error handling remains the same)
     if (error instanceof Error) {
-        return { error: `An error occurred: ${error.message}` };
+      return { error: `An error occurred: ${error.message}` };
     }
     return { error: 'An unknown error occurred.' };
   }
 }
-  

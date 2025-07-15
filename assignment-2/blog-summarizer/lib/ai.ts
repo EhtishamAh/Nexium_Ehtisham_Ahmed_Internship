@@ -1,20 +1,20 @@
 // file: lib/ai.ts
 
-// 1. Simulated Summarization Logic
-export function summarizeText(text: string, wordCount = 50): string {
+export function summarizeText(text: string, wordCount = 100): string {
   const cleanedText = text.replace(/\s+/g, ' ').trim();
   const words = cleanedText.split(' ');
   if (words.length <= wordCount) {
     return cleanedText;
   }
-  return words.slice(0, wordCount).join(' ') + '...';
+  return words.slice(0, wordCount).join(' ');
 }
 
-// 2. JavaScript Dictionary for Translation
 const urduDictionary: { [key: string]: string } = {
-    'the': 'یہ',
+    'the': 'دی',
     'is': 'ہے',
     'a': 'ایک',
+    'are': 'ہیں',
+    'ai': 'مصنوعی ذہانت',
     'blog': 'بلاگ',
     'post': 'پوسٹ',
     'summary': 'خلاصہ',
@@ -22,12 +22,44 @@ const urduDictionary: { [key: string]: string } = {
     'about': 'کے بارے میں',
     'and': 'اور',
     'it': 'یہ',
-    'web': 'ویب',
+    'for': 'کے لیے',
+    'to': 'کو',
+    'in': 'میں',
+    'of': 'کا',
+    'models': 'ماڈلز',
+    'google': 'گوگل',
+    'paper': 'پیپر',
+    'from': 'سے',
+    'that': 'کہ',
+    'with': 'کے ساتھ',
+    'on': 'پر',
+    'as': 'بطور',
+    'at': 'پر',
+    'by': 'کی طرف سے',
+    'we': 'ہم',
+    'they': 'وہ',
+    'you': 'آپ',
+    'can': 'سکتے ہیں',
+    'will': 'کریں گے',
+    'should': 'چاہیے',
+    'data': 'ڈیٹا',
+    'code': 'کوڈ',
+    'system': 'سسٹم',
+    'software': 'سافٹ ویئر',
+    'users': 'صارفین',
+    'features': 'خصوصیات',
+    'new': 'نیا',
+    'important': 'اہم',
+    'similar': 'اسی طرح',
+    'different': 'مختلف',
+    'research': 'تحقیق',
+    'technology': 'ٹیکنالوجی',
     'development': 'ڈیویلپمنٹ',
-    'technology': 'ٹیکنالوجی'
+    'use': 'استعمال',
+    'work': 'کام',
+    'like': 'جیسے'
 };
 
-// 3. Simple Translation Logic
 export function translateToUrdu(text: string): string {
     const words = text.toLowerCase().replace(/[.,]/g, '').split(' ');
     const translatedWords = words.map(word => urduDictionary[word] || word);
