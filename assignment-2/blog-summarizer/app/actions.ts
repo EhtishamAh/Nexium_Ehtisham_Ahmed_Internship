@@ -1,17 +1,18 @@
-// file: app/actions.ts
-'use server';
+  // file: app/actions.ts
+  'use server';
 
-import * as cheerio from 'cheerio';
-// Import our new AI functions
-import { summarizeText, translateToUrdu } from '@/lib/ai';
+  import * as cheerio from 'cheerio';
+  // Import our new AI functions
+  import { summarizeText, translateToUrdu } from '@/lib/ai';
+  import { supabase } from '@/lib/supabaseClient';
 
-// Update the scrapeAndSummarise function
-export async function scrapeAndSummarise(url: string) {
-  if (!url) {
-    return { error: 'URL is required.' };
-  }
+  // Update the scrapeAndSummarise function
+  export async function scrapeAndSummarise(url: string) {
+    if (!url) {
+      return { error: 'URL is required.' };
+    }
 
-  try {
+    try {
     const response = await fetch(url);
     // ... (fetching and cheerio logic remains the same)
     const html = await response.text();
@@ -22,15 +23,34 @@ export async function scrapeAndSummarise(url: string) {
       return { error: 'Could not extract any text from the page.' };
     }
 
-    // --- NEW LOGIC ---
-    // Use our new functions
+    // --- AI LOGIC (Stays the same) ---
     const summary = summarizeText(fullText);
     const urduTranslation = translateToUrdu(summary);
 
+    // --- ADD THE NEW SUPABASE LOGIC HERE ---
+    try {
+      const { error: supabaseError } = await supabase
+        .from('Summary') // The name of the table we created manually
+        .insert({
+          url: url,
+          summary: summary,
+          translation: urduTranslation,
+        });
+
+      if (supabaseError) {
+        throw supabaseError;
+      }
+      console.log('Summary successfully saved to Supabase for URL:', url);
+    } catch (dbError) {
+      console.error("Supabase Database Error:", dbError);
+      // Don't block the user, just log the error
+    }
+
+    // --- RETURN STATEMENT (Stays the same) ---
     return {
       summary,
-      urduTranslation, // Add translation to the return object
-      fullText 
+      urduTranslation,
+      fullText
     };
 
   } catch (error) {
@@ -41,3 +61,4 @@ export async function scrapeAndSummarise(url: string) {
     return { error: 'An unknown error occurred.' };
   }
 }
+  
