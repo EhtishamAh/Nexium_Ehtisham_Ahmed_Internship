@@ -5,6 +5,7 @@
   // Import our new AI functions
   import { summarizeText, translateToUrdu } from '@/lib/ai';
   import { supabase } from '@/lib/supabaseClient';
+  import clientPromise from '@/lib/mongodb'; // Import Mongo client
 
   // Update the scrapeAndSummarise function
   export async function scrapeAndSummarise(url: string) {
@@ -45,6 +46,21 @@
       console.error("Supabase Database Error:", dbError);
       // Don't block the user, just log the error
     }
+
+    // --- NEW MONGODB LOGIC ---
+try {
+    const mongoClient = await clientPromise;
+    const db = mongoClient.db("blogContent"); // Use the DB name from your URI
+    await db.collection("articles").insertOne({
+        url: url,
+        fullText: fullText,
+        scrapedAt: new Date(),
+    });
+} catch (mongoError) {
+    console.error("MongoDB Error:", mongoError);
+}
+
+
 
     // --- RETURN STATEMENT (Stays the same) ---
     return {
