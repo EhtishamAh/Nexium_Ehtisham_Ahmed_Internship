@@ -42,7 +42,7 @@ Experience the Quote Generator live at: **[https://awesome-quote-generator.verce
 An intelligent web application built to scrape any blog post, generate a concise summary, and translate it into Urdu. This project, Assignment 2 of the internship, demonstrates a full-stack workflow, including web scraping, server-side logic, dual-database integration (PostgreSQL and MongoDB), and a modern, interactive user interface.
 
  ### 🚀 Live Demo
-Check out the AI Blog Summariser live at: https://your-blog-summariser-url.vercel.app/
+Check out the AI Blog Summariser live at: https://blog-summarizer-nexium-mu.vercel.app/
 
 ### 🖼️ Preview
 
