@@ -31,8 +31,8 @@
     --radius: 0.5rem
   }
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 20% 13%; /* A dark blue color */
+    --foreground: 0 0% 95%; /* Slightly softer white */
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
@@ -64,5 +64,23 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Add these keyframes and utility class */
+@layer utilities {
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out forwards;
   }
 }
