@@ -10,11 +10,12 @@ if (!MONGODB_URI) {
   );
 }
 
-// @ts-ignore
+// Use @ts-expect-error as recommended by the linter
+// @ts-expect-error
 let cached = global.mongoose;
 
 if (!cached) {
-  // @ts-ignore
+  // @ts-expect-error
   cached = global.mongoose = { conn: null, promise: null };
 }
 

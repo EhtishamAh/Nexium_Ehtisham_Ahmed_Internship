@@ -3,18 +3,25 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { savePitchAction, deletePitchAction } from "./actions"; 
+import { savePitchAction, deletePitchAction } from "./actions";
 import { Copy, Save, Trash2, Check } from "lucide-react";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
+
+// Define a proper type for the pitch prop to avoid 'any'
+interface PitchData {
+  pitchId: string;
+  status: 'draft' | 'saved';
+  aiResponse: {
+    [key: string]: any;
+  };
+}
 
 function SaveButton() {
   const { pending } = useFormStatus();
   return (
     <Button disabled={pending} type="submit">
-      {pending ? (
-        "Saving..."
-      ) : (
+      {pending ? ( "Saving..." ) : (
         <span className="flex items-center">
           <Save className="mr-2 h-4 w-4" /> Save to Dashboard
         </span>
@@ -32,7 +39,7 @@ function DeleteButton() {
   );
 }
 
-export function ResultActions({ pitch }: { pitch: any }) {
+export function ResultActions({ pitch }: { pitch: PitchData }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
