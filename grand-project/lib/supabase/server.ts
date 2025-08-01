@@ -1,3 +1,5 @@
+// /grand-project/lib/supabase/server.ts
+
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -14,16 +16,18 @@ export function createClient() {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
+            // The 'error' variable is removed here as it was unused
             cookieStore.set({ name, value, ...options })
           } catch (error) {
-            // The `set` method was called from a Server Component.
+            // Called from a Server Component.
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
+            // The 'error' variable is removed here as it was unused
             cookieStore.set({ name, value: '', ...options })
           } catch (error) {
-            // The `delete` method was called from a Server Component.
+            // Called from a Server Component.
           }
         },
       },
