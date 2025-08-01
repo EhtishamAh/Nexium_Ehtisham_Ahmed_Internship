@@ -13,7 +13,8 @@ interface PitchData {
   pitchId: string;
   status: 'draft' | 'saved';
   aiResponse: {
-    [key: string]: any;
+    // This is more specific than 'any', fixing the lint error
+    [key: string]: string; 
   };
 }
 
