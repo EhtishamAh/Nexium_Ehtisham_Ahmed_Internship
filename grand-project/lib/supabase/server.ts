@@ -17,14 +17,14 @@ export function createClient() {
         set(name: string, value: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value, ...options })
-          } catch (_error) { // <-- This is the fix
+          } catch (_error) { // Use _error to silence the warning
             // Called from a Server Component.
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: '', ...options })
-          } catch (_error) { // <-- This is the fix
+          } catch (_error) { // Use _error to silence the warning
             // Called from a Server Component.
           }
         },

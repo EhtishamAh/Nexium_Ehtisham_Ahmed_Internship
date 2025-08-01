@@ -7,6 +7,11 @@ import PitchDocument from "@/models/PitchDocument";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResultActions } from "./ResultActions";
 
+// Define a clear type for the page's props to resolve the error
+type ResultPageProps = {
+  params: { id: string };
+};
+
 async function getPitchData(pitchId: string) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -14,11 +19,10 @@ async function getPitchData(pitchId: string) {
 
   const { data: pitchMeta } = await supabase
     .from('pitches')
-    .select('id, pitch_title, status, user_id') // Select user_id for security
+    .select('id, pitch_title, status, user_id')
     .eq('id', pitchId)
     .single();
 
-  // Security check: ensure user owns this pitch
   if (!pitchMeta || pitchMeta.user_id !== user.id) {
     notFound();
   }
@@ -32,7 +36,8 @@ async function getPitchData(pitchId: string) {
   return { pitchMeta, pitchDoc };
 }
 
-export default async function ResultPage({ params }: { params: { id: string } }) {
+// Use the new type in the function signature
+export default async function ResultPage({ params }: ResultPageProps) {
   const { pitchMeta, pitchDoc } = await getPitchData(params.id);
 
   const pitchSections = Object.entries(pitchDoc.aiResponse).map(([key, value]) => {
@@ -56,7 +61,6 @@ export default async function ResultPage({ params }: { params: { id: string } })
               <CardTitle>{section.title}</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* --- THIS IS THE FIX --- */}
               <p className="whitespace-pre-wrap">{String(section.content)}</p>
             </CardContent>
           </Card>
