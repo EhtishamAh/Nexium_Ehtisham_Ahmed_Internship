@@ -7,7 +7,7 @@ import PitchDocument from "@/models/PitchDocument";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResultActions } from "./ResultActions";
 
-// NOTE: We are defining the type for the props here
+// Define a clear type for the page's props to resolve the error
 type ResultPageProps = {
   params: { id: string };
 };
