@@ -7,12 +7,15 @@ import PitchDocument from "@/models/PitchDocument";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResultActions } from "./ResultActions";
 
-// Define a clear type for the page's props to resolve the error
+// NOTE: We are defining the type for the props here
 type ResultPageProps = {
   params: { id: string };
 };
 
-async function getPitchData(pitchId: string) {
+export default async function ResultPage({ params }: ResultPageProps) {
+  const pitchId = params.id;
+  
+  // --- Data fetching logic is now directly inside the component ---
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
@@ -32,13 +35,7 @@ async function getPitchData(pitchId: string) {
   if (!pitchDoc) {
     notFound();
   }
-
-  return { pitchMeta, pitchDoc };
-}
-
-// Use the new type in the function signature
-export default async function ResultPage({ params }: ResultPageProps) {
-  const { pitchMeta, pitchDoc } = await getPitchData(params.id);
+  // --- End of data fetching logic ---
 
   const pitchSections = Object.entries(pitchDoc.aiResponse).map(([key, value]) => {
     const title = key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
