@@ -2,7 +2,7 @@
 
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import dbConnect from "@/lib/mongodb";
 import PitchDocument from "@/models/PitchDocument";
