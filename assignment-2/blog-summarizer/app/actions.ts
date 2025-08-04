@@ -3,7 +3,7 @@
 
 import * as cheerio from 'cheerio';
 import { summarizeText, translateToUrdu } from '@/lib/ai';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/utils/supabaseClient';
 import clientPromise from '@/lib/mongodb';
 
 export async function scrapeAndSummarise(url: string) {
