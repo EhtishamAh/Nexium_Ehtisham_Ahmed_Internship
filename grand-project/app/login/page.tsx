@@ -1,48 +1,79 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import { magicLinkLogin } from './actions'
+// /grand-project/app/login/page.tsx
+'use client'
+
+import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client' // <-- Note: client import
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default async function LoginPage() {
-  const supabase = createClient()
+export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  // This code checks if the user is already logged in
-  const { data } = await supabase.auth.getUser()
-  if (data?.user) {
-    // If they are, redirect them to the dashboard
-    redirect('/dashboard')
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setError(null)
+    const supabase = createClient()
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email,
+      options: {
+        // This must match the URL in your Supabase dashboard settings
+        emailRedirectTo: `${location.origin}/api/auth/callback`,
+      },
+    })
+
+    if (error) {
+      console.error('Error logging in:', error)
+      setError(error.message)
+    } else {
+      setSubmitted(true)
+    }
   }
 
-  // If there is no user, we show the login form
+  if (submitted) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl">Check your email</CardTitle>
+            <CardDescription>
+              We&apos;ve sent a magic link to <strong>{email}</strong>. Click the link in the email to log in.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-950">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen w-full items-center justify-center">
+      <Card className="w-full max-w-sm mx-4">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to receive a magic link.
-          </CardDescription>
+          <CardTitle className="text-2xl">Welcome Back!</CardTitle>
+          <CardDescription>Enter your email to receive a magic login link.</CardDescription>
         </CardHeader>
-        <form>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="me@example.com"
-                required
-              />
+        <CardContent>
+          <form onSubmit={handleLogin}>
+            <div className="grid w-full items-center gap-4">
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full">Send Magic Link</Button>
+              {error && <p className="text-sm text-red-500">{error}</p>}
             </div>
-            <Button formAction={magicLinkLogin} className="w-full">
-              Send Magic Link
-            </Button>
-          </CardContent>
-        </form>
+          </form>
+        </CardContent>
       </Card>
     </div>
   )
