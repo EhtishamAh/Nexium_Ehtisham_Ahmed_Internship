@@ -18,24 +18,22 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          // This method reads a cookie from the incoming request.
+          // The get, set, and remove methods MUST NOT be async.
           get(name: string) {
             return cookies().get(name)?.value;
           },
-          // This method sets a cookie on the outgoing response.
           set(name: string, value: string, options: CookieOptions) {
             try {
               cookies().set({ name, value, ...options });
             } catch (error) {
-              // Errors can be ignored if middleware is used to refresh sessions.
+              // Ignore errors.
             }
           },
-          // This method removes a cookie from the outgoing response.
           remove(name: string, options: CookieOptions) {
             try {
               cookies().set({ name, value: '', ...options });
             } catch (error) {
-              // Errors can be ignored if middleware is used to refresh sessions.
+              // Ignore errors.
             }
           },
         },
