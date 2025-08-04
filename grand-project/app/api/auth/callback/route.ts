@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-// This ensures the route is always run dynamically for every request.
+// This ensures the route is always run dynamically.
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          // The get, set, and remove methods MUST NOT be async.
+          // These helper functions MUST be synchronous (no "async").
           get(name: string) {
             return cookies().get(name)?.value;
           },
@@ -26,25 +26,27 @@ export async function GET(request: NextRequest) {
             try {
               cookies().set({ name, value, ...options });
             } catch (error) {
-              // Ignore errors.
+              // Ignore errors if middleware is handling cookie refresh.
             }
           },
           remove(name: string, options: CookieOptions) {
             try {
               cookies().set({ name, value: '', ...options });
             } catch (error) {
-              // Ignore errors.
+              // Ignore errors if middleware is handling cookie refresh.
             }
           },
         },
       }
     );
+    
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+    
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
 
-  // Redirect to an error page if there's no code or if an error occurred.
+  // Redirect to an error page if something went wrong.
   return NextResponse.redirect(`${origin}/auth/auth-code-error`);
 }
