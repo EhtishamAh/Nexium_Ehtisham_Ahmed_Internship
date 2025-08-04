@@ -1,3 +1,4 @@
+// /grand-project/middleware.ts
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -38,6 +39,7 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  // This will refresh the user's session cookie if it has expired.
   await supabase.auth.getUser()
 
   return response
@@ -45,6 +47,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
     '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 }
