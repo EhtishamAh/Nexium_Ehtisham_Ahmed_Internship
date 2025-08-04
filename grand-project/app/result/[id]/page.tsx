@@ -5,7 +5,6 @@ import PitchDocument, { IPitchDocument } from "@/models/PitchDocument";
 import { notFound } from "next/navigation";
 import { ResultView } from "./ResultView";
 
-// This function fetches the pitch data from your database.
 async function getPitchData(pitchId: string): Promise<IPitchDocument | null> {
   await dbConnect();
   const pitch = await PitchDocument.findOne({ pitchId: pitchId }).lean();
@@ -17,12 +16,15 @@ async function getPitchData(pitchId: string): Promise<IPitchDocument | null> {
 
 
 // ==================================================================
-// THE ALTERNATIVE SOLUTION
-// Instead of a separate type, we define the props shape inline here.
+// A COMPLETELY NEW METHOD
+// We accept a single `props` object and access `params` inside.
+// This changes the function signature to avoid the TypeScript error.
 // ==================================================================
-export default async function ResultPage({ params }: { params: { id: string } }) {
+export default async function ResultPage(props: { params: { id: string } }) {
+  // Access the id from props.params inside the function body
+  const id = props.params.id;
+  const pitchData = await getPitchData(id);
 // ==================================================================
-  const pitchData = await getPitchData(params.id);
 
   if (!pitchData) {
     notFound();
