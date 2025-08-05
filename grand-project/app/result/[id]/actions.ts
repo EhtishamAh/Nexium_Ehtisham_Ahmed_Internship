@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "crypto";
 
-export async function savePitchAction(pitchId: string) {
+export async function savePitchAction() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -14,21 +14,20 @@ export async function savePitchAction(pitchId: string) {
     return redirect("/login");
   }
 
-  if (pitchId === "new") {
-    const newPitchId = randomUUID();
-    const { error } = await supabase
-      .from("pitches")
-      .insert({
-        id: newPitchId,
-        user_id: user.id,
-        pitch_title: "AI-Generated Meal Prep Pitch",
-        status: "saved",
-      });
+  // Always create a new pitch record.
+  const newPitchId = randomUUID();
+  const { error } = await supabase
+    .from("pitches")
+    .insert({
+      id: newPitchId,
+      user_id: user.id,
+      pitch_title: "AI-Generated Meal Prep Pitch",
+      status: "saved",
+    });
 
-    if (error) {
-      console.error("Supabase insert error:", error);
-      return;
-    }
+  if (error) {
+    console.error("Supabase insert error:", error);
+    return;
   }
 
   revalidatePath("/dashboard");

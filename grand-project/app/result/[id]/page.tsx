@@ -1,4 +1,5 @@
 // /grand-project/app/result/[id]/page.tsx
+"use client"; // Make this a client component to be safe
 
 import Link from "next/link";
 import {
@@ -19,12 +20,9 @@ import {
   Gem,
   AlertCircle,
 } from "lucide-react";
-import { notFound } from "next/navigation";
-import { createClient } from "@/utils/supabase/server";
-import { pitchData } from "@/lib/pitch-data";
 import { savePitchAction } from "./actions";
+import { pitchData } from "@/lib/pitch-data";
 
-// This is a simple helper component; it's not the main page.
 function PitchSection({
   icon: Icon,
   title,
@@ -47,38 +45,17 @@ function PitchSection({
   );
 }
 
-// This is now a pure, async Server Component page.
-// There is NO "use client" here.
-export default async function ResultPage({ params }: { params: { id: string } }) {
-  const pitchId = params.id;
-  let pitchTitle = "AI-Generated Meal Prep Pitch";
-
-  // If the ID is not 'new', fetch the real data directly here.
-  if (pitchId !== "new") {
-    const supabase = createClient();
-    const { data: savedPitch, error } = await supabase
-      .from("pitches")
-      .select("pitch_title")
-      .eq("id", pitchId)
-      .single();
-
-    if (error || !savedPitch) {
-      notFound();
-    }
-    pitchTitle = savedPitch.pitch_title;
-  }
-
-  // Use the static data for the main content.
+// This is now a simple, non-async component. It does not fetch any data.
+export default function ResultPage() {
   const content = pitchData;
 
-  // The rest of the component just renders the JSX with the fetched data.
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
       <div className="mx-auto max-w-4xl">
         <Card className="overflow-hidden shadow-2xl shadow-primary/10">
           <CardHeader className="bg-primary/5 text-center">
             <Badge variant="secondary" className="mx-auto mb-4 w-fit animate-fade-in-up">
-              ✨ {pitchTitle}
+              ✨ AI-Generated Meal Prep Pitch
             </Badge>
             <CardTitle className="text-3xl font-bold tracking-tight text-primary animate-fade-in-up" style={{ animationDelay: '100ms' }}>
               Elevator Pitch
@@ -99,7 +76,7 @@ export default async function ResultPage({ params }: { params: { id: string } })
             </div>
           </CardContent>
           <CardFooter className="flex justify-center space-x-4 bg-secondary/30 p-6">
-            <form action={savePitchAction.bind(null, pitchId)}>
+            <form action={savePitchAction}>
               <Button type="submit" size="lg" className="animate-fade-in-up" style={{ animationDelay: '500ms' }}>
                 Save Pitch
               </Button>

@@ -1,5 +1,3 @@
-// /grand-project/app/dashboard/page.tsx
-
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -20,7 +18,7 @@ export default async function DashboardPage() {
     .from("pitches")
     .select("id, pitch_title, created_at")
     .eq("user_id", user.id)
-    .eq("status", "saved") // Only show saved pitches
+    .eq("status", "saved")
     .order("created_at", { ascending: false });
 
   return (
@@ -40,8 +38,9 @@ export default async function DashboardPage() {
       {pitches && pitches.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {pitches.map((pitch) => (
-            <Link href={`/result/${pitch.id}`} key={pitch.id}>
-              <Card className="hover:border-primary transition-colors">
+            // This Link now points every card to the same static result page.
+            <Link href="/result/new" key={pitch.id}>
+              <Card className="hover:border-primary transition-colors cursor-pointer">
                 <CardHeader>
                   <CardTitle>{pitch.pitch_title}</CardTitle>
                   <CardDescription>
