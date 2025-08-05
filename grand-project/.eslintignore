@@ -1,7 +1,0 @@
-# Standard directories to ignore
-node_modules
-.next
-out
-
-# Ignore the auto-generated Prisma Client folder
-app/generated/
