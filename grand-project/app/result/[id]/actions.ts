@@ -14,10 +14,8 @@ export async function savePitchAction(pitchId: string) {
     return redirect("/login");
   }
 
-  // Only create a new pitch if it's the initial "new" version.
   if (pitchId === "new") {
     const newPitchId = randomUUID();
-
     const { error } = await supabase
       .from("pitches")
       .insert({
@@ -33,7 +31,6 @@ export async function savePitchAction(pitchId: string) {
     }
   }
 
-  // For any pitch, revalidate and redirect to the dashboard.
   revalidatePath("/dashboard");
   redirect("/dashboard");
 }

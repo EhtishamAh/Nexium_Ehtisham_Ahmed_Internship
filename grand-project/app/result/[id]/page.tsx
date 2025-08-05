@@ -20,9 +20,9 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { savePitchAction } from "./actions";
-import { getPitch } from "./data"; // Import our new data function
+import { getPitch } from "./data"; // We'll use the dedicated data function
 
-// This helper component remains the same.
+// Helper component (no changes needed)
 function PitchSection({
   icon: Icon,
   title,
@@ -45,13 +45,21 @@ function PitchSection({
   );
 }
 
+// THE FIX: Use a clear 'Props' type and access props directly.
+type Props = {
+  params: {
+    id: string;
+  };
+};
 
-// The page is now much simpler.
-export default async function ResultPage({ params }: { params: { id: string } }) {
-  // 1. Call our new function to get all the data.
-  const { pitchTitle, content } = await getPitch(params.id);
+// Mark the component as 'async' and use the 'Props' type.
+export default async function ResultPage(props: Props) {
+  // Access the id from the props object.
+  const id = props.params.id;
+  
+  // Call our data function to get all the data.
+  const { pitchTitle, content } = await getPitch(id);
 
-  // 2. The rest of the component just renders the JSX.
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
       <div className="mx-auto max-w-4xl">
@@ -81,7 +89,7 @@ export default async function ResultPage({ params }: { params: { id: string } })
           </CardContent>
 
           <CardFooter className="flex justify-center space-x-4 bg-secondary/30 p-6">
-            <form action={savePitchAction.bind(null, params.id)}>
+            <form action={savePitchAction.bind(null, id)}>
               <Button type="submit" size="lg" className="animate-fade-in-up" style={{ animationDelay: '500ms' }}>
                 Save Pitch
               </Button>
