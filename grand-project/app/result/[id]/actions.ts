@@ -33,3 +33,9 @@ export async function savePitchAction() {
   revalidatePath("/dashboard");
   redirect("/dashboard");
 }
+
+export async function deletePitchAction() {
+  // In this simplified version, "deleting" just takes the user back to the dashboard.
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
+}
