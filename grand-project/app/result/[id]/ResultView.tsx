@@ -44,14 +44,14 @@ export function ResultView({ pitch }: { pitch: IPitchDocument }) {
 
   const handleSave = () => {
     startTransition(() => {
-      savePitchAction(pitch.pitchId);
+      savePitchAction();
     });
   };
 
   const handleDelete = () => {
     if (confirm("Are you sure you want to delete this pitch?")) {
       startTransition(() => {
-        deletePitchAction(pitch.pitchId);
+        deletePitchAction();
       });
     }
   };
