@@ -1,69 +1,120 @@
-// /app/result/[id]/page.tsx
-'use client'; // This is now a client component
+// /grand-project/app/result/[id]/page.tsx
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { IPitchDocument } from '@/models/PitchDocument';
-import { ResultView } from './ResultView';
-import { Loader2 } from 'lucide-react';
+import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Lightbulb,
+  Target,
+  Users,
+  Goal,
+  Gem,
+  AlertCircle,
+} from "lucide-react";
+import { savePitchAction } from "./actions";
+import { pitchData } from "@/lib/pitch-data";
+import { createClient } from "@/utils/supabase/server";
+import { notFound } from "next/navigation";
 
-export default function ResultPage() {
-  const params = useParams();
-  const id = params.id as string;
-
-  // State to hold our data, loading status, and any errors
-  const [pitchData, setPitchData] = useState<IPitchDocument | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchPitch = async () => {
-      try {
-        setIsLoading(true);
-        // Fetch data from the new API route
-        const response = await fetch(`/api/result/${id}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch pitch data.');
-        }
-        
-        const data = await response.json();
-        setPitchData(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPitch();
-  }, [id]); // Re-run effect if the id changes
-
-  // Render a loading state
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <p className="ml-4 text-lg">Loading your pitch...</p>
-      </div>
-    );
-  }
-
-  // Render an error state
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen text-red-500">
-        <p>Error: {error}</p>
-      </div>
-    );
-  }
-
-  // Render the result once data is loaded
+// This helper component remains the same.
+function PitchSection({
+  icon: Icon,
+  title,
+  content,
+}: {
+  icon: React.ElementType;
+  title: string;
+  content: string;
+}) {
   return (
-    <main className="container mx-auto p-4 md:p-8">
-      {pitchData && <ResultView pitch={pitchData} />}
-    </main>
+    <div className="flex items-start space-x-4 rounded-lg bg-secondary/50 p-4 animate-fade-in-up">
+      <div className="mt-1 flex-shrink-0">
+        <Icon className="h-6 w-6 text-primary" />
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold text-primary">{title}</h3>
+        <p className="text-muted-foreground">{content}</p>
+      </div>
+    </div>
+  );
+}
+
+// This is the combined, async component.
+export default async function ResultPage({ params }: { params: { id: string } }) {
+  const pitchId = params.id;
+  let pitchTitle = "AI-Generated Meal Prep Pitch"; // Default title for a new pitch
+
+  // If the ID is not 'new', it's a saved pitch, so we fetch its title.
+  if (pitchId !== "new") {
+    const supabase = createClient();
+    const { data: pitch, error } = await supabase
+      .from("pitches")
+      .select("pitch_title")
+      .eq("id", pitchId)
+      .single();
+
+    if (error || !pitch) {
+      notFound(); // If no pitch is found for the ID, show a 404 page.
+    }
+    pitchTitle = pitch.pitch_title;
+  }
+
+  // The main content still comes from our static data file.
+  const content = pitchData;
+
+  return (
+    <div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
+      <div className="mx-auto max-w-4xl">
+        <Card className="overflow-hidden shadow-2xl shadow-primary/10">
+          <CardHeader className="bg-primary/5 text-center">
+            <Badge
+              variant="secondary"
+              className="mx-auto mb-4 w-fit animate-fade-in-up"
+            >
+              {/* This now displays the dynamic title */}
+              ✨ {pitchTitle}
+            </Badge>
+            <CardTitle className="text-3xl font-bold tracking-tight text-primary animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+              Elevator Pitch
+            </CardTitle>
+            <CardDescription className="text-lg text-muted-foreground pt-2 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+              {content.elevatorPitch}
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-6 p-6 md:p-8" style={{ animationDelay: '300ms' }}>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <PitchSection icon={AlertCircle} title="The Problem" content={content.problem} />
+              <PitchSection icon={Lightbulb} title="Our Solution" content={content.solution} />
+              <PitchSection icon={Users} title="Target Market" content={content.targetMarket} />
+              <PitchSection icon={Gem} title="Unique Selling Point" content={content.uniqueSellingPoint} />
+            </div>
+            <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+              <PitchSection icon={Goal} title="Call to Action" content={content.callToAction} />
+            </div>
+          </CardContent> {/* ✅ This was the line with the typo */}
+
+          <CardFooter className="flex justify-center space-x-4 bg-secondary/30 p-6">
+            {/* The form now uses .bind() to pass the pitchId to the server action */}
+            <form action={savePitchAction.bind(null, pitchId)}>
+              <Button type="submit" size="lg" className="animate-fade-in-up" style={{ animationDelay: '500ms' }}>
+                Save Pitch
+              </Button>
+            </form>
+            <Button asChild size="lg" variant="destructive" className="animate-fade-in-up" style={{ animationDelay: '600ms' }}>
+              <Link href="/dashboard">Delete</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
   );
 }

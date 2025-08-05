@@ -1,47 +1,49 @@
-// app/api/auth/callback/route.ts
+// /grand-project/app/api/auth/callback/route.ts
 
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-// This ensures the route is always run dynamically.
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
   const next = searchParams.get('next') ?? '/dashboard';
 
   if (code) {
+    // THE CRITICAL FIX: Add the 'await' keyword here.
+    const cookieStore = await cookies();
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          // These helper functions MUST be synchronous (no "async").
+          // Now, cookieStore is the actual object, not a Promise.
           get(name: string) {
-            return cookies().get(name)?.value;
+            return cookieStore.get(name)?.value;
           },
           set(name: string, value: string, options: CookieOptions) {
             try {
-              cookies().set({ name, value, ...options });
+              cookieStore.set({ name, value, ...options });
             } catch (error) {
-              // Ignore errors if middleware is handling cookie refresh.
+              // This can be ignored if middleware is handling cookie refresh.
             }
           },
           remove(name: string, options: CookieOptions) {
             try {
-              cookies().set({ name, value: '', ...options });
+              cookieStore.set({ name, value: '', ...options });
             } catch (error) {
-              // Ignore errors if middleware is handling cookie refresh.
+              // This can be ignored if middleware is handling cookie refresh.
             }
           },
         },
       }
     );
-    
+
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    
+
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }

@@ -1,0 +1,9 @@
+// lib/pitch-data.ts
+export const pitchData = {
+  elevatorPitch: "For busy parents who struggle with meal planning, MealPrepAI is a revolutionary AI-powered platform that simplifies meal organization and grocery shopping, saving time and reducing stress.",
+  problem: "Many parents find it challenging to plan healthy and varied meals each week due to time constraints and a lack of inspiration. This often leads to resorting to unhealthy takeout options or repetitive, uninspired meals. The constant struggle of meal planning costs families valuable time and money.",
+  solution: "MealPrepAI offers a personalized meal planning experience using AI to generate custom meal plans based on dietary preferences, available ingredients, and nutritional needs. By automating the planning process and generating smart grocery lists, MealPrepAI helps families save time, eat healthier, and reduce food waste.",
+  targetMarket: "Our primary target market is dual-income families with children aged 5-18, a demographic that is highly receptive to tech-enabled solutions for simplifying daily life. This represents a multi-billion dollar market opportunity within the broader family wellness and convenience space.",
+  uniqueSellingPoint: "Unlike traditional meal planning apps that offer generic recipes, MealPrepAI leverages AI to create truly personalized meal plans tailored to individual needs and preferences. Our platform dynamically adjusts plans based on user feedback, ensuring continuous improvement and satisfaction, leading to higher user retention.",
+  callToAction: "We are seeking $250,000 in seed funding to expand our AI capabilities and scale our marketing efforts. We invite you to partner with us to revolutionize the way families approach meal planning.",
+};

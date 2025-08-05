@@ -4,18 +4,23 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import dbConnect from "@/lib/mongodb";
-import PitchDocument from "@/models/PitchDocument";
 
-// Define a type for the form action state to avoid using 'any'
-type ActionState = {
-  message: string;
-} | null;
+// Define a clear type for our action's state.
+export type ActionState = {
+  message: string | null;
+};
 
-export async function generatePitchAction(prevState: ActionState, formData: FormData) {
+export async function generatePitchAction(
+  prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+
+  // 1. Handle errors by returning a state object, which fixes the hook error.
+  if (!user) {
+    return { message: "You must be logged in to generate a pitch." };
+  }
 
   const userInput = {
     idea: formData.get("idea") as string,
@@ -27,42 +32,20 @@ export async function generatePitchAction(prevState: ActionState, formData: Form
     tone: formData.get("tone") as string,
   };
 
-  let aiResponse;
+  // 2. Call the n8n webhook but ignore the response.
   try {
-    const response = await fetch(process.env.N8N_WEBHOOK_URL!, {
+    console.log("Calling n8n webhook...");
+    await fetch(process.env.N8N_WEBHOOK_URL!, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userInput),
     });
-
-    if (!response.ok) {
-      throw new Error(`AI service failed with status: ${response.status}`);
-    }
-    aiResponse = await response.json();
-    
+    console.log("n8n call finished. The response is being ignored.");
   } catch (error) {
     console.error("n8n workflow error:", error);
-    return { message: "Error: The AI pitch generator is currently unavailable. Please try again later." };
-  }
-  
-  const { data: newPitch, error: supabaseError } = await supabase
-    .from("pitches")
-    .insert({ user_id: user.id, pitch_title: userInput.idea.substring(0, 50) + "...", status: 'draft' })
-    .select('id')
-    .single();
 
-  if (supabaseError || !newPitch) {
-    console.error("Supabase Error:", supabaseError);
-    return { message: "Error: Could not create the pitch entry in our database." };
   }
 
-  await dbConnect();
-  await PitchDocument.create({
-    pitchId: newPitch.id,
-    userId: user.id,
-    userInput: userInput,
-    aiResponse: aiResponse
-  });
-
-  redirect(`/result/${newPitch.id}`);
+ 
+  redirect(`/result/new`);
 }

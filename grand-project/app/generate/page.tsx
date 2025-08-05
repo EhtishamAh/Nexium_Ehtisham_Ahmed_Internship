@@ -4,7 +4,7 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { generatePitchAction } from "./actions";
+import { generatePitchAction, type ActionState } from "./actions"; // Import the type
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,13 @@ function SubmitButton() {
 }
 
 export default function GeneratePage() {
-  const [state, formAction] = useActionState(generatePitchAction, null);
+  // THE FIX: Define an initial state that matches the ActionState type.
+  const initialState: ActionState = {
+    message: null,
+  };
+
+  // Provide the initial state to the hook. This resolves the errors.
+  const [state, formAction] = useActionState(generatePitchAction, initialState);
 
   return (
     <div className="container max-w-2xl mx-auto p-4 md:py-12">
@@ -76,7 +82,8 @@ export default function GeneratePage() {
               </Select>
             </div>
             <SubmitButton />
-            {state?.message && <p className="text-red-500 text-sm mt-2">{state.message}</p>}
+            {/* This will now work correctly for displaying error messages */}
+            {state.message && <p className="text-red-500 text-sm mt-2">{state.message}</p>}
           </form>
         </CardContent>
       </Card>

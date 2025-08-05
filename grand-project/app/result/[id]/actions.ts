@@ -1,48 +1,39 @@
 // /grand-project/app/result/[id]/actions.ts
-
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import dbConnect from "@/lib/mongodb";
-import PitchDocument from "@/models/PitchDocument";
+import { revalidatePath } from "next/cache";
+import { randomUUID } from "crypto";
 
 export async function savePitchAction(pitchId: string) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("User not authenticated");
 
-  // Update status in Supabase, ensuring the user owns the pitch
-  const { error } = await supabase
-    .from('pitches')
-    .update({ status: 'saved' })
-    .eq('id', pitchId)
-    .eq('user_id', user.id);
-
-  if (error) {
-    console.error("Save Pitch Error:", error);
-    throw new Error("Failed to save pitch");
+  if (!user) {
+    return redirect("/login");
   }
 
-  // Revalidate paths to update the UI and then redirect
-  revalidatePath('/dashboard');
-  revalidatePath(`/result/${pitchId}`);
-  redirect('/dashboard');
-}
+  // Only create a new pitch if it's the initial "new" version.
+  if (pitchId === "new") {
+    const newPitchId = randomUUID();
 
-export async function deletePitchAction(pitchId: string) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("User not authenticated");
+    const { error } = await supabase
+      .from("pitches")
+      .insert({
+        id: newPitchId,
+        user_id: user.id,
+        pitch_title: "AI-Generated Meal Prep Pitch",
+        status: "saved",
+      });
 
-  // 1. Delete from Supabase (with security check)
-  await supabase.from('pitches').delete().eq('id', pitchId).eq('user_id', user.id);
+    if (error) {
+      console.error("Supabase insert error:", error);
+      return;
+    }
+  }
 
-  // 2. Delete from MongoDB
-  await dbConnect();
-  await PitchDocument.deleteOne({ pitchId: pitchId, userId: user.id });
-
-  revalidatePath('/dashboard');
-  redirect('/dashboard');
+  // For any pitch, revalidate and redirect to the dashboard.
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
 }
