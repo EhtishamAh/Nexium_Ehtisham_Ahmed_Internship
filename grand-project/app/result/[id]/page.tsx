@@ -20,9 +20,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { savePitchAction } from "./actions";
-import { pitchData } from "@/lib/pitch-data";
-import { createClient } from "@/utils/supabase/server";
-import { notFound } from "next/navigation";
+import { getPitch } from "./data"; // Import our new data function
 
 // This helper component remains the same.
 function PitchSection({
@@ -47,39 +45,19 @@ function PitchSection({
   );
 }
 
-// This is the combined, async component.
+
+// The page is now much simpler.
 export default async function ResultPage({ params }: { params: { id: string } }) {
-  const pitchId = params.id;
-  let pitchTitle = "AI-Generated Meal Prep Pitch"; // Default title for a new pitch
+  // 1. Call our new function to get all the data.
+  const { pitchTitle, content } = await getPitch(params.id);
 
-  // If the ID is not 'new', it's a saved pitch, so we fetch its title.
-  if (pitchId !== "new") {
-    const supabase = createClient();
-    const { data: pitch, error } = await supabase
-      .from("pitches")
-      .select("pitch_title")
-      .eq("id", pitchId)
-      .single();
-
-    if (error || !pitch) {
-      notFound(); // If no pitch is found for the ID, show a 404 page.
-    }
-    pitchTitle = pitch.pitch_title;
-  }
-
-  // The main content still comes from our static data file.
-  const content = pitchData;
-
+  // 2. The rest of the component just renders the JSX.
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
       <div className="mx-auto max-w-4xl">
         <Card className="overflow-hidden shadow-2xl shadow-primary/10">
           <CardHeader className="bg-primary/5 text-center">
-            <Badge
-              variant="secondary"
-              className="mx-auto mb-4 w-fit animate-fade-in-up"
-            >
-              {/* This now displays the dynamic title */}
+            <Badge variant="secondary" className="mx-auto mb-4 w-fit animate-fade-in-up">
               ✨ {pitchTitle}
             </Badge>
             <CardTitle className="text-3xl font-bold tracking-tight text-primary animate-fade-in-up" style={{ animationDelay: '100ms' }}>
@@ -100,11 +78,10 @@ export default async function ResultPage({ params }: { params: { id: string } })
             <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>
               <PitchSection icon={Goal} title="Call to Action" content={content.callToAction} />
             </div>
-          </CardContent> {/* ✅ This was the line with the typo */}
+          </CardContent>
 
           <CardFooter className="flex justify-center space-x-4 bg-secondary/30 p-6">
-            {/* The form now uses .bind() to pass the pitchId to the server action */}
-            <form action={savePitchAction.bind(null, pitchId)}>
+            <form action={savePitchAction.bind(null, params.id)}>
               <Button type="submit" size="lg" className="animate-fade-in-up" style={{ animationDelay: '500ms' }}>
                 Save Pitch
               </Button>
